@@ -1,4 +1,5 @@
 #include "backend.h"
+#include "main.hpp"
 #include "rendervulkan.hpp"
 #include "wlserver.hpp"
 #include "vblankmanager.hpp"
@@ -1680,6 +1681,16 @@ namespace gamescope
         }
         g_nOutputWidth  = WaylandScaleToPhysical( nWidth, uScale );
         g_nOutputHeight = WaylandScaleToPhysical( nHeight, uScale );
+        
+        int scaled_g_nOutputWidth = g_nOutputWidth * g_nestedScaleForWindow;
+        int scaled_g_nOutputHeight = g_nOutputHeight * g_nestedScaleForWindow;
+        if (g_nestedScaleForWindow != -1 && (g_nNestedWidth != scaled_g_nOutputWidth || g_nNestedHeight != scaled_g_nOutputHeight)) {
+            g_nNestedWidth = scaled_g_nOutputWidth;
+            g_nNestedHeight = scaled_g_nOutputHeight;
+            
+            auto xwayland_server_tmp = wlserver_get_xwayland_server(0);
+            xwayland_server_tmp->update_output_info();
+        }
 
         CommitLibDecor( pConfiguration );
 

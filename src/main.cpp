@@ -81,6 +81,7 @@ const struct option *gamescope_options = (struct option[]){
 	{ "grab", no_argument, nullptr, 'g' },
 	{ "force-grab-cursor", no_argument, nullptr, 0 },
 	{ "display-index", required_argument, nullptr, 0 },
+	{ "nested-folow-window-scale", required_argument, nullptr, 0},
 
 	// embedded mode options
 	{ "disable-layers", no_argument, nullptr, 0 },
@@ -217,6 +218,7 @@ const char usage[] =
 	"  -g, --grab                     grab the keyboard\n"
 	"  --force-grab-cursor            always use relative mouse mode instead of flipping dependent on cursor visibility.\n"
 	"  --display-index                forces gamescope to use a specific display in nested mode."
+	"  --nested-folow-window-scale    Enables nested mode size (-w and -h) to be updated to this scale relitive to the output window size (multiplied by this scale factor), when being resized. Default -1 (disabled) (WAYLAND & SDL ONLY)"
 	"\n"
 	"Embedded mode options:\n"
 	"  -O, --prefer-output            list of connectors in order of preference (ex: DP-1,DP-2,DP-3,HDMI-A-1)\n"
@@ -283,6 +285,7 @@ int g_nNestedHeight = 0;
 int g_nNestedRefresh = 0;
 int g_nNestedUnfocusedRefresh = 0;
 int g_nNestedDisplayIndex = 0;
+float g_nestedScaleForWindow = -1;
 
 uint32_t g_nOutputWidth = 0;
 uint32_t g_nOutputHeight = 0;
@@ -800,6 +803,8 @@ int main(int argc, char **argv)
 					g_bForceRelativeMouse = true;
 				} else if (strcmp(opt_name, "display-index") == 0) {
 					g_nNestedDisplayIndex = parse_integer( optarg, opt_name );
+				} else if (strcmp(opt_name, "nested-folow-window-scale") == 0) {
+					g_nestedScaleForWindow = parse_float(optarg, opt_name);
 				} else if (strcmp(opt_name, "adaptive-sync") == 0) {
 					cv_adaptive_sync = true;
 				} else if (strcmp(opt_name, "expose-wayland") == 0) {
@@ -977,8 +982,13 @@ int main(int argc, char **argv)
 			fprintf( stderr, "Cannot specify -w without -h\n" );
 			return 1;
 		}
-		g_nNestedWidth = g_nOutputWidth;
-		g_nNestedHeight = g_nOutputHeight;
+		if (g_nestedScaleForWindow != -1) {
+			g_nNestedWidth = g_nOutputWidth * g_nestedScaleForWindow;
+			g_nNestedHeight = g_nOutputHeight * g_nestedScaleForWindow;
+		} else {
+			g_nNestedWidth = g_nOutputWidth;
+			g_nNestedHeight = g_nOutputHeight;
+		}
 	}
 	if ( g_nNestedWidth == 0 )
 		g_nNestedWidth = g_nNestedHeight * 16 / 9;

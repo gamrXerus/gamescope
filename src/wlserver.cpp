@@ -215,6 +215,7 @@ void wlserver_xdg_commit(struct wlr_surface *surf, struct wlr_buffer *buf)
 	nudge_steamcompmgr();
 }
 
+int previously_issued_nested_width, previously_issued_nested_height;
 void xwayland_surface_commit(struct wlr_surface *wlr_surface) {
 	wlr_surface->current.committed = 0;
 
@@ -1685,6 +1686,19 @@ gamescope_xwayland_server_t::~gamescope_xwayland_server_t()
 
 void gamescope_xwayland_server_t::update_output_info()
 {
+	int refresh = g_nNestedRefresh;
+	if (refresh == 0) {
+		refresh = g_nOutputRefresh;
+	}
+
+	wlr_output_state_set_enabled(output_state, true);
+	wlr_output_state_set_custom_mode(output_state, g_nNestedWidth, g_nNestedHeight, refresh);
+	if (!wlr_output_commit_state(output, output_state))
+	{
+		wl_log.errorf("Failed to commit headless output");
+		abort();
+	}
+
 	const auto *info = &wlserver.output_info;
 
 	output->phys_width = info->phys_width;
