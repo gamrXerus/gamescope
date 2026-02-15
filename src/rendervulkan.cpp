@@ -183,8 +183,12 @@ struct wsi_memory_allocate_info {
 // DRM doesn't have 32bit floating point formats, so add our own
 #define DRM_FORMAT_ABGR32323232F fourcc_code('A', 'B', '8', 'F')
 
+#ifndef DRM_FORMAT_R16F
 #define DRM_FORMAT_R16F fourcc_code('R', '1', '6', 'F')
+#endif
+#ifndef DRM_FORMAT_R32F
 #define DRM_FORMAT_R32F fourcc_code('R', '3', '2', 'F')
+#endif
 
 struct {
 	uint32_t DRMFormat;
