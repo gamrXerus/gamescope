@@ -20,6 +20,15 @@ add_project_arguments([
 ], language: 'cpp')
 
 cppc = meson.get_compiler('cpp')
+cc = meson.get_compiler('c')
+
+add_global_arguments([
+	'-DWLR_USE_UNSTABLE',
+], language: 'c')
+
+add_global_arguments([
+	'-DWLR_USE_UNSTABLE',
+], language: 'cpp')
 
 data_dir = get_option('datadir')
 prefix = get_option('prefix')
